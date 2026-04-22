@@ -17,16 +17,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@SuppressWarnings("deprecation") // exercising the deprecated legacy PBKDF2 KDF
 class TokenCryptTest {
 
     private static final SecureRandom RNG = new SecureRandom();
 
     /**
-     * Canonical v1 test vectors shared across Go, Node, PHP, Python, Rust,
-     * and Java implementations. Derived via PBKDF2-SHA3-256 with secret="a",
-     * salt="b", iterations=1000.
+     * Canonical v1 envelope test vectors — shared with Go, Node, PHP, Python,
+     * Rust, and other implementations. The 32-byte AES key was originally
+     * derived via the legacy PBKDF2-SHA3-256 KDF with secret="a", salt="b",
+     * iterations=1000; this library only supports the modern KDFs, so the
+     * derived key is hardcoded here so we can still verify envelope-level
+     * interop.
      */
+    private static final byte[] CANONICAL_KEY = new byte[] {
+        (byte) 0x2f, (byte) 0x84, (byte) 0x15, (byte) 0x18, (byte) 0x69, (byte) 0xd7, (byte) 0xd2, (byte) 0x25,
+        (byte) 0x5d, (byte) 0x62, (byte) 0xb3, (byte) 0x32, (byte) 0x0e, (byte) 0x97, (byte) 0x42, (byte) 0x9b,
+        (byte) 0xde, (byte) 0x5a, (byte) 0xac, (byte) 0x04, (byte) 0xa0, (byte) 0x57, (byte) 0x3b, (byte) 0x24,
+        (byte) 0x68, (byte) 0x52, (byte) 0x9a, (byte) 0x74, (byte) 0x17, (byte) 0x51, (byte) 0x5f, (byte) 0x87,
+    };
+
     private static Stream<Arguments> canonicalVectors() {
         return Stream.of(
             Arguments.of("a", "3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8"),
@@ -39,8 +48,8 @@ class TokenCryptTest {
                 "3ncr.org/1#EPw7S5+BG6hn/9Sjf6zoYUCdwlzweeB+ahBIabUD6NogAcevXszOGHz9Jzv4vQ"));
     }
 
-    private static TokenCrypt legacy() {
-        return TokenCrypt.fromPbkdf2Sha3("a", "b", 1000);
+    private static TokenCrypt canonical() {
+        return TokenCrypt.fromRawKey(CANONICAL_KEY);
     }
 
     private static byte[] randomKey() {
@@ -52,13 +61,13 @@ class TokenCryptTest {
     @ParameterizedTest
     @MethodSource("canonicalVectors")
     void decryptsCanonicalVector(String plaintext, String encrypted) {
-        assertEquals(plaintext, legacy().decryptIf3ncr(encrypted));
+        assertEquals(plaintext, canonical().decryptIf3ncr(encrypted));
     }
 
     @ParameterizedTest
     @MethodSource("canonicalVectors")
     void roundTripsCanonicalPlaintext(String plaintext, String ignoredEncrypted) {
-        TokenCrypt tc = legacy();
+        TokenCrypt tc = canonical();
         String enc = tc.encrypt3ncr(plaintext);
         assertTrue(enc.startsWith(TokenCrypt.HEADER_V1), "should start with header");
         assertEquals(plaintext, tc.decryptIf3ncr(enc));
@@ -130,7 +139,7 @@ class TokenCryptTest {
 
     @Test
     void decoderAcceptsPaddedInput() {
-        TokenCrypt tc = legacy();
+        TokenCrypt tc = canonical();
         String plaintext = "a";
         String encrypted = "3ncr.org/1#I09Dwt6q05ZrH8GQ0cp+g9Jm0hD0BmCwEdylCh8";
         String body = encrypted.substring(TokenCrypt.HEADER_V1.length());

@@ -12,11 +12,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
-import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.params.Argon2Parameters;
-import org.bouncycastle.crypto.params.KeyParameter;
 
 /**
  * Java implementation of the <a href="https://3ncr.org/">3ncr.org</a> v1 string
@@ -122,36 +119,6 @@ public final class TokenCrypt {
     /** Convenience overload: UTF-8 encodes {@code secret} before hashing. */
     public static TokenCrypt fromArgon2id(String secret, byte[] salt) {
         return fromArgon2id(secret.getBytes(StandardCharsets.UTF_8), salt);
-    }
-
-    /**
-     * Derive the AES key via PBKDF2-HMAC-SHA3-256 (legacy KDF).
-     *
-     * <p>Kept for backward compatibility with data encrypted by earlier
-     * 3ncr.org libraries. New callers should use
-     * {@link #fromArgon2id(byte[], byte[])} for passwords or
-     * {@link #fromRawKey(byte[])} / {@link #fromSha3(byte[])} for high-entropy
-     * secrets. See <a href="https://3ncr.org/1/#kdf">the v1 spec</a>.
-     *
-     * @deprecated legacy KDF; use {@link #fromArgon2id(byte[], byte[])} for
-     *     passwords or {@link #fromRawKey(byte[])} / {@link #fromSha3(byte[])}
-     *     for high-entropy secrets.
-     */
-    @Deprecated
-    public static TokenCrypt fromPbkdf2Sha3(byte[] secret, byte[] salt, int iterations) {
-        PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(new SHA3Digest(256));
-        gen.init(secret, salt, iterations);
-        KeyParameter kp = (KeyParameter) gen.generateDerivedParameters(AES_KEY_SIZE * 8);
-        return new TokenCrypt(kp.getKey());
-    }
-
-    /** Convenience overload: UTF-8 encodes {@code secret} and {@code salt}. */
-    @Deprecated
-    public static TokenCrypt fromPbkdf2Sha3(String secret, String salt, int iterations) {
-        return fromPbkdf2Sha3(
-            secret.getBytes(StandardCharsets.UTF_8),
-            salt.getBytes(StandardCharsets.UTF_8),
-            iterations);
     }
 
     /** Encrypt a UTF-8 string and return a {@code 3ncr.org/1#...} value. */

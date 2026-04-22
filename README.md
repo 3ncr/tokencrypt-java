@@ -14,8 +14,8 @@ string. v1 uses AES-256-GCM with a 12-byte random IV:
 Encrypted values look like
 `3ncr.org/1#pHRufQld0SajqjHx+FmLMcORfNQi1d674ziOPpG52hqW5+0zfJD91hjXsBsvULVtB017mEghGy3Ohj+GgQY5MQ`.
 
-Requires JDK 11+. AES-256-GCM and SHA3-256 come from the JDK; Argon2id and
-PBKDF2-SHA3 come from [Bouncy Castle](https://www.bouncycastle.org/).
+Requires JDK 11+. AES-256-GCM and SHA3-256 come from the JDK; Argon2id comes
+from [Bouncy Castle](https://www.bouncycastle.org/).
 
 ## Install
 
@@ -69,17 +69,6 @@ token), hash it through SHA3-256:
 TokenCrypt tc = TokenCrypt.fromSha3("some-high-entropy-api-token");
 ```
 
-### Legacy: PBKDF2-SHA3
-
-The original `(secret, salt, iterations)` KDF is kept for backward compatibility
-with data encrypted by earlier 3ncr.org libraries. It is **deprecated** — prefer
-`fromArgon2id`, `fromRawKey`, or `fromSha3` for new code.
-
-```java
-@SuppressWarnings("deprecation")
-TokenCrypt tc = TokenCrypt.fromPbkdf2Sha3("my-secret", "my-salt", 1000);
-```
-
 ### Encrypt / decrypt
 
 ```java
@@ -100,14 +89,16 @@ Decryption failures (bad tag, truncated input, malformed base64) throw
 
 ## Cross-implementation interop
 
-This implementation decrypts the canonical v1 test vectors shared with the
-[Go](https://github.com/3ncr/tokencrypt),
+This implementation decrypts the canonical v1 envelope test vectors shared with
+the [Go](https://github.com/3ncr/tokencrypt),
 [Node.js](https://github.com/3ncr/nodencrypt),
 [PHP](https://github.com/3ncr/tokencrypt-php),
 [Python](https://github.com/3ncr/tokencrypt-python), and
-[Rust](https://github.com/3ncr/tokencrypt-rust) reference libraries
-(`secret = "a"`, `salt = "b"`, `iterations = 1000`). See
-`src/test/java/org/_3ncr/tokencrypt/TokenCryptTest.java`.
+[Rust](https://github.com/3ncr/tokencrypt-rust) reference libraries. The 32-byte
+AES key those vectors were originally derived from (PBKDF2-SHA3-256 of
+`secret = "a"`, `salt = "b"`, `iterations = 1000`) is hardcoded in the test
+suite for envelope-level interop — this library only exposes the modern KDFs.
+See `src/test/java/org/_3ncr/tokencrypt/TokenCryptTest.java`.
 
 ## License
 
