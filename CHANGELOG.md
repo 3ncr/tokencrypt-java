@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **Minimum JDK raised from 11 to 17.** JUnit Jupiter 6 requires JDK 17+, and
+  keeping the older floor would have frozen the test framework on the 5.x line.
+  Java 11 has been dropped from the CI matrix.
+- JUnit Jupiter bumped 5.10.2 → 6.0.3.
+- `maven-surefire-plugin` bumped 3.2.5 → 3.5.5 (JUnit 6 compatibility).
+
 ## [1.0.0] - 2026-04-22
 
 Initial release. Stable Java API for the

@@ -20,7 +20,7 @@ This is the official Java implementation.
 
 ## Install
 
-Requires JDK 11+. AES-256-GCM and SHA3-256 come from the JDK; Argon2id comes
+Requires JDK 17+. AES-256-GCM and SHA3-256 come from the JDK; Argon2id comes
 from [Bouncy Castle](https://www.bouncycastle.org/).
 
 Maven:
