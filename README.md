@@ -2,6 +2,7 @@
 
 [![Test](https://github.com/3ncr/tokencrypt-java/actions/workflows/test.yml/badge.svg)](https://github.com/3ncr/tokencrypt-java/actions/workflows/test.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org._3ncr/tokencrypt.svg)](https://central.sonatype.com/artifact/org._3ncr/tokencrypt)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/3ncr/tokencrypt-java/badge)](https://scorecard.dev/viewer/?uri=github.com/3ncr/tokencrypt-java)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [3ncr.org](https://3ncr.org/) is a standard for string encryption / decryption
